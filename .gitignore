@@ -1,0 +1,12 @@
+# Ignoriere den node_modules-Ordner
+node_modules/
+
+# Ignoriere das build-Verzeichnis
+/build
+
+# Ignoriere VS Code-spezifische Dateien
+.vscode/
+
+# Ignoriere Betriebssystem-spezifische Dateien
+.DS_Store
+Thumbs.db
