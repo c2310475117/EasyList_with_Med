@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="todo.css">
+  <script>
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        console.log('Abgerufene Query-Parameter:', params.get('token'), params.get('user_id'));
+        return {
+            token: params.get('token'),
+            userId: params.get('user_id')
+        };
+    }
+
+    window.onload = () => {
+        const { token, userId } = getQueryParams();
+        if (token && userId) {
+          console.log('Token and userId found. Storing in localStorage...');
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId);
+            console.log('Fetching user name for userId:', userId);
+
+        } else {
+          console.log('Token or userId not found. Displaying user name...');
+            displayUserName();
+        }
+    };
+
+
+    function displayUserName() {
+        const userName = localStorage.getItem('username');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        if (userName && welcomeMessage) {
+            welcomeMessage.textContent = `Welcome to Easy List, ${userName}`;
+            console.log(`Set welcome message to: Welcome to Easy List, ${userName}`);
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        window.location.href = 'index.html';
+    }
+  </script>
+</head>
+<body>
+  <header class="todo-list-header">
+    <h1 id="welcomeMessage">Welcome to Easy List</h1>
+    <button onclick="logout()" id="logoutButton">Logout</button>
+  </header>
+  <div class="todo-list-container">
+    <form id="createListForm" class="create-list-form">
+      <input type="text" id="listName" placeholder="Add new list called...">
+      <button type="submit">Add</button>
+    </form>
+    <div class="todo-list-scrollable">
+      <div id="listContainer" class="list-grid"></div>
+    </div>
+  </div>
+  <script src="index.js" type="module"></script>
+</body>
+</html>

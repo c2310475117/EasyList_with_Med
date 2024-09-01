@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login or Register</title>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="auth-container">
+    <header class="auth-header">
+      <h1>Welcome to Easy List</h1>
+    </header>
+    <main class="auth-main">
+      <section id="loginSection" style="display:none;">
+        <h2>Login to Account</h2>
+        <form id="loginForm">
+          <input placeholder="Username" name="YourName" type="text" required>
+          <br>
+          <input placeholder="Password" name="Password" type="password" required>
+          <br>
+          <input class="sub" type="submit" value="Login">
+        </form>
+        <p>Don't have an account? <a href="#" onclick="toggleForm('register')">Register here</a></p>
+      </section>
+
+      <section id="registerSection" style="display:block;">
+        <h2>Register an Account</h2>
+        <form id="registerForm">
+          <input placeholder="Username" name="YourName" type="text" required>
+          <br>
+          <input placeholder="Email" name="YourEmail" type="email" required>
+          <br>
+          <input placeholder="Password" name="Password" type="password" required>
+          <br>
+          <input class="sub" type="submit" value="Register">
+        </form>
+        <p>Already have an account? <a href="#" onclick="toggleForm('login')">Login here</a></p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function toggleForm(formId) {
+      const loginSection = document.getElementById('loginSection');
+      const registerSection = document.getElementById('registerSection');
+    
+      if (formId === 'login') {
+        loginSection.style.display = 'block';
+        registerSection.style.display = 'none';
+      } else if (formId === 'register') {
+        loginSection.style.display = 'none';
+        registerSection.style.display = 'block';
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const username = event.target.YourName.value;
+      const password = event.target.Password.value;
+
+      try {
+        console.log('Sending login request');
+        const response = await fetch('http://localhost:3000/user/login', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+          console.log('Login successful');
+          const data = await response.json(); 
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', data.user_id);
+          window.location.href = `todo.html?token=${data.token}&user_id=${data.user_id}`;
+        } else {
+          const errorText = await response.text();
+          console.error('Login failed:', errorText);
+          alert('Login failed. Please check your credentials.');
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const username = event.target.YourName.value;
+      const email = event.target.YourEmail.value;
+      const password = event.target.Password.value;
+
+      try {
+        console.log('Sending registration request');
+        const response = await fetch('http://localhost:3000/user/register', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        if (response.ok) {
+          console.log('Registration successful');
+          const data = await response.json(); 
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', data.user_id);
+          window.location.href = `todo.html?token=${data.token}&user_id=${data.user_id}`;
+        } else {
+          const errorText = await response.text();
+          console.error('Registration failed:', errorText);
+          alert(`Registration failed: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error during registration:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

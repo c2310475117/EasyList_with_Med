@@ -1,0 +1,217 @@
+/* Allgemeine Stile */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden; /* Verhindert Scrollen des gesamten Körpers */
+  }
+  
+  h1 {
+    font-weight: 300;
+    color: #262626;
+    margin: 0;
+  }
+  
+  button {
+    background-color: #ff6347; /* Tomatenrot für den "Add" Button */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px; /* Abgerundete Ecken */
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  button:hover {
+    background-color: #ff4500; /* Dunkleres Rot beim Hover */
+  }
+  
+  /* Container-Stile */
+  .todo-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    margin-bottom: 20px;
+    margin-top: 20px; /* Abstand oben hinzufügen */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  #logoutButton {
+    background-color: #dbdbdb;
+    color: #262626;
+    border-radius: 20px;
+  }
+  
+  #logoutButton:hover {
+    background-color: #b3b3b3;
+  }
+  
+  .todo-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: white;
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 120px); /* Höhe anpassen für Header und Padding */
+  }
+  
+  .create-list-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px; /* Abstand zwischen dem Formular und der Liste */
+  }
+  
+  .create-list-form input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+    font-size: 16px;
+  }
+  
+  .create-list-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  .todo-list-scrollable {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto; /* Nur vertikales Scrollen ermöglichen */
+  }
+  
+  .list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Zwei Spalten nebeneinander */
+    gap: 20px;
+  }
+  
+  .user-list {
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  }
+  
+  .user-list .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .user-list h3 {
+    font-weight: 500;
+    color: #262626;
+    margin: 0;
+  }
+  
+  .user-list .delete-list-button {
+    background: none;
+    border: none;
+    color: #ff6347;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .todo-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .todo-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #dbdbdb;
+    background-color: #fff;
+  }
+  
+  .todo-list-item:last-child {
+    border-bottom: none;
+  }
+  
+  .todo-list-item input[type="checkbox"] {
+    accent-color: #ff6347; /* Farbe für Checkbox */
+  }
+  
+  .todo-list-item .title {
+    flex: 1;
+    margin-left: 10px;
+    font-weight: 400;
+  }
+  
+  .todo-list-item .delete-button {
+    background: none;
+    border: none;
+    color: #ff6347;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .add-item-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 10px; /* Abstand zwischen der Liste und dem "Add new item" Formular */
+  }
+  
+  .add-item-form input {
+    padding: 10px 15px;
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+    font-size: 16px;
+  }
+  
+  .add-item-form select {
+    padding: 10px;
+    border: 1px solid #dbdbdb;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+    font-size: 16px;
+  }
+  
+  .add-item-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #ff6347; /* Tomatenrot */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .add-item-form button:hover {
+    background-color: #ff4500; /* Dunkleres Rot beim Hover */
+  }
+  
