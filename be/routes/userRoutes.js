@@ -2,6 +2,7 @@
 
 import express from 'express';
 import User from '../models/userModel.js';
+//import List from '../models/listModel.js';
 import bcrypt from 'bcrypt';
 import { generateAccessToken, verifyToken, authMiddleware } from '../auth.js';
 import { Op } from 'sequelize';
@@ -31,13 +32,15 @@ router.post('/register', async (req, res) => {
 
     console.log('User created successfully:', user);
 
-    const listName = "default List";
-    const defaultList = await createList(listName, user.user_id);
-    console.log('Default list created for user:', defaultList);
+    //const listName = "default List";
+    //const defaultList = await List.create({ // create erwartet ein Objekt !
+      //list_name: listName,
+      //l_user_id: user.user_id }) 
+   // console.log('Default list created for user:', defaultList);
 
     const token = generateAccessToken(user.user_id);
 
-    res.status(201).json({ token, l_user_id: user.user_id, defaultList }); // Geändert: Senden von JSON-Antworten statt Redirect
+    res.status(201).json({ token, l_user_id: user.user_id, userName: user.user_name}); // Geändert: Senden von JSON-Antworten statt Redirect
   } catch (error) {
     console.error('Error during registration:', error);
     res.status(500).json({ message: 'Internal server error', error: error.errors ? error.errors[0].message : error.message });
@@ -61,7 +64,7 @@ router.post('/login', async (req, res) => {
 
     const token = generateAccessToken(user.user_id);
     console.log('Login successful, token generated:', token);
-    res.status(200).json({ token, user_id: user.user_id }); // Geändert: Senden von JSON-Antworten statt Redirect
+    res.status(200).json({ token, userId: user.user_id, userName: user.user_name }); // Geändert: Senden von JSON-Antworten statt Redirect
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });

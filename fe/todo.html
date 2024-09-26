@@ -6,32 +6,38 @@
   <title>To-Do List</title>
   <link rel="stylesheet" href="todo.css">
   <script>
-    function getQueryParams() {
+
+   /* function getQueryParams() {
         const params = new URLSearchParams(window.location.search);
-        console.log('Abgerufene Query-Parameter:', params.get('token'), params.get('user_id'));
+        console.log('Abgerufene Query-Parameter:', params.get('token'), params.get('userId'));
         return {
             token: params.get('token'),
-            userId: params.get('user_id')
+            userId: params.get('userId')
         };
     }
+    */
 
     window.onload = () => {
-        const { token, userId } = getQueryParams();
-        if (token && userId) {
-          console.log('Token and userId found. Storing in localStorage...');
-            localStorage.setItem('token', token);
-            localStorage.setItem('userId', userId);
-            console.log('Fetching user name for userId:', userId);
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userName = localStorage.getItem('userName');
+
+        if (token && userId && userName) {
+          console.log('Token, userId und userNamefound. Storing in localStorage...');
+          displayUserName();
+          
+          console.log('Fetching user name for userId:', userId);
 
         } else {
           console.log('Token or userId not found. Displaying user name...');
-            displayUserName();
+          window.location.href = 'index.html'; // Gehe zum Login-Bildschirm zurück
+          displayUserName();
         }
     };
 
 
     function displayUserName() {
-        const userName = localStorage.getItem('username');
+      const userName = localStorage.getItem('userName');
         const welcomeMessage = document.getElementById('welcomeMessage');
         if (userName && welcomeMessage) {
             welcomeMessage.textContent = `Welcome to Easy List, ${userName}`;
@@ -42,7 +48,7 @@
     function logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
-        localStorage.removeItem('username');
+        localStorage.removeItem('userName');
         window.location.href = 'index.html';
     }
   </script>

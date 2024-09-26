@@ -119,7 +119,7 @@ class ToDoListManager {
       listContainer.appendChild(listElement);
   
       // Aufruf von renderItemsForList für Icons und Wörter
-      this.renderItemsForList(list.list_id, list.icons, list.words);
+      this.renderItemsForList(list.list_id, list.icons, list.words,);
     });
   }
   

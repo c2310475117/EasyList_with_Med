@@ -74,8 +74,9 @@
           console.log('Login successful');
           const data = await response.json(); 
           localStorage.setItem('token', data.token);
-          localStorage.setItem('userId', data.user_id);
-          window.location.href = `todo.html?token=${data.token}&user_id=${data.user_id}`;
+          localStorage.setItem('userId', data.userId);
+          localStorage.setItem('userName', data.userName); 
+          window.location.href = `todo.html?token=${data.token}&user_id=${data.userId}`;
         } else {
           const errorText = await response.text();
           console.error('Login failed:', errorText);
@@ -107,8 +108,9 @@
           console.log('Registration successful');
           const data = await response.json(); 
           localStorage.setItem('token', data.token);
-          localStorage.setItem('userId', data.user_id);
-          window.location.href = `todo.html?token=${data.token}&user_id=${data.user_id}`;
+          localStorage.setItem('userId', data.l_user_id);
+          localStorage.setItem('userName', data.userName); 
+          window.location.href = `todo.html?token=${data.token}&user_id=${data.l_user_id}`;
         } else {
           const errorText = await response.text();
           console.error('Registration failed:', errorText);
