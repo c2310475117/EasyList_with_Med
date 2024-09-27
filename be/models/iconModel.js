@@ -19,6 +19,10 @@ Icon.init({
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  completed: {
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false
+  },
   i_list_id: {
     type: DataTypes.INTEGER,
     allowNull: false,

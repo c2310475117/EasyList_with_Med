@@ -88,6 +88,59 @@ router.get('/:listId/words', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+//-------------------------------------------------------------------
+
+router.put('/:listId/words/:wordId', authMiddleware, async (req, res) => {
+  const { listId, wordId } = req.params;
+  const { completed } = req.body;
+
+  try {
+   
+    const [updated] = await Word.update(
+      { 
+        completed, 
+        updated_at: new Date() 
+      }, 
+      { where: { word_id: wordId, w_list_id: listId } }
+    );
+
+    if (updated) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Word not found');
+    }
+  } catch (error) {
+    console.error('Error updating word status:', error);
+    res.status(500).send('Error updating status');
+  }
+});
+
+router.put('/:listId/icons/:iconId', authMiddleware, async (req, res) => {
+  const { listId, iconId } = req.params;
+  const { completed } = req.body;
+
+  try {
+   
+    const [updated] = await Icon.update(
+      { 
+        completed, 
+        updated_at: new Date() 
+      }, 
+      { where: { icon_id: iconId, i_list_id: listId } }
+    );
+
+    if (updated) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Word not found');
+    }
+  } catch (error) {
+    console.error('Error updating word status:', error);
+    res.status(500).send('Error updating status');
+  }
+});
+
+//-------------------------------------------------------------------
 
 router.post('/:listId/icons', authMiddleware, async (req, res) => {
   const { listId } = req.params;
@@ -141,8 +194,6 @@ router.get('/:listId/icons', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-
 
 
 export default router;

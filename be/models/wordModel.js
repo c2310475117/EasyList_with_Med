@@ -24,6 +24,10 @@ Word.init({
       key: 'list_id',
     },
   },
+  completed: {
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

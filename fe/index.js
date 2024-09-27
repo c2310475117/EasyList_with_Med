@@ -20,7 +20,7 @@ class ToDoListManager {
         console.error('Initialization error:', error);
       }
     }
-  
+// ----------------------------------------------------------------------------
     async fetchUserLists() {
       try {
         const response = await fetch('http://localhost:3000/list', {
@@ -36,7 +36,7 @@ class ToDoListManager {
         for (const list of lists.lists) {
           const [icons, words] = await Promise.all([
             this.fetchItemsForList(list.list_id, 'icons'),
-            this.fetchItemsForList(list.list_id, 'words')
+            this.fetchItemsForList(list.list_id, 'words'),
           ]);
   
           list.icons = icons;
@@ -49,14 +49,14 @@ class ToDoListManager {
         console.error('Error fetching user lists or items:', error);
       }
     }
-  
+// ----------------------------------------------------------------------------
     getHeaders() {
       return {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
       };
     }
-  
+// ----------------------------------------------------------------------------
     async fetchItemsForList(listId, type) {
       try {
         const response = await fetch(`http://localhost:3000/list/${listId}/${type}`, {
@@ -75,22 +75,35 @@ class ToDoListManager {
         return []; // Rückgabe eines leeren Arrays im Fehlerfall
       }
     }
-  
+// ----------------------------------------------------------------------------  
     renderItemsForList(listId, items_icons, items_words) {
-      const listElement = document.querySelector(`div[data-list-id='${listId}']`);
+      const listElement = document.querySelector(`div[data-list-id='${listId}']`); // 
       const itemListElement = listElement.querySelector('.word-list');
       itemListElement.innerHTML = '';
   
-      items_words.forEach(({ word_name }) => {  // Nutzung von Destrukturierung
-        itemListElement.innerHTML += `<li>${word_name}</li>`; // Nutzung von Template-Literal für HTML-String
-      });
+      items_words.forEach(({ word_name, word_id, completed }) => {  // Nutzung von Destrukturierung
+        const isChecked = completed ? 'checked' : '';
+        itemListElement.innerHTML += `
+        <li class="todo-list-item">
+        <input type="checkbox" class="todo-list-item input" ${isChecked} data-word-id="${word_id}">
+          <span>${word_name}</span>
+          <button class="delete-button">Delete</button>
+        </li>
+      `;
+    });
   
-      items_icons.forEach(({ icon_svg }) => {  // Nutzung von Destrukturierung
-        itemListElement.innerHTML += `<li>${icon_svg}</li>`;
-      });
+      items_icons.forEach(({ icon_svg, icon_id, completed }) => {  // Nutzung von Destrukturierung
+        const isChecked = completed ? 'checked' : '';
+        itemListElement.innerHTML += `
+        <li class="todo-list-item">
+        <input type="checkbox" class="todo-list-item input" ${isChecked} data-icon-id="${icon_id}">
+          <span>${icon_svg}</span>
+        <button class="delete-button">Delete</button>
+      </li>
+    `;
+  });
   }
-  
-  
+// ----------------------------------------------------------------------------  
   renderUserLists(lists) {
     console.log('Rendering user lists.');
     const listContainer = document.getElementById('listContainer');
@@ -100,11 +113,11 @@ class ToDoListManager {
       console.log('Rendering list:', list.list_name);
       const listElement = document.createElement('div');
       listElement.classList.add('user-list');
-      listElement.dataset.listId = list.list_id;
+      listElement.dataset.listId = list.list_id; // setz die ID aus der Datenbank auf class="user-list" im HTML 
       listElement.innerHTML = `
         <div class="list-header">
           <h3>${list.list_name}</h3>
-          <button class="delete-list-button">X</button>
+          <button type="submit" class="delete-list-button">Delete</button>
         </div>
         <ul class="word-list"></ul>
         <form id="addWordForm-${list.list_id}" class="add-word-form">
@@ -119,11 +132,10 @@ class ToDoListManager {
       listContainer.appendChild(listElement);
   
       // Aufruf von renderItemsForList für Icons und Wörter
-      this.renderItemsForList(list.list_id, list.icons, list.words,);
+      this.renderItemsForList(list.list_id, list.icons, list.words);
     });
   }
-  
-  
+// ----------------------------------------------------------------------------
     async addItemToList(listId, keyword, type) {
       try {
         const response = await fetch(`http://localhost:3000/list/${listId}/${type}`, {
@@ -141,9 +153,10 @@ class ToDoListManager {
         console.error(`Error adding ${type} to list:`, error);
       }
     }
-  
-    setupEventListeners() {
+// ----------------------------------------------------------------------------
+    setupEventListeners(){ 
       console.log('Setting up event listeners');
+
       document.getElementById('createListForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const listName = event.target.listName.value.trim();
@@ -160,8 +173,50 @@ class ToDoListManager {
           if (keyword) await this.addItemToList(listId, keyword, type);
         }
       });
+
+      document.getElementById('listContainer').addEventListener('change', (event) => {
+        if (event.target.matches('.todo-list-item input')) {
+          const listId = event.target.closest('.user-list').dataset.listId; // List ID finden
+          const wordId = event.target.dataset.wordId; // Word ID abrufen
+          const iconId = event.target.dataset.iconId; // Icon ID abrufen
+          const isChecked = event.target.checked; // Checkbox-Status
+      
+          // Bestimme, ob es ein Word oder ein Icon ist
+          const type = wordId ? 'words' : 'icons';
+          const itemId = wordId || iconId; // Verwende entweder wordId oder iconId
+      
+          if (!itemId) {
+            console.error('Item ID not found');
+            return;
+          }
+      
+          // Aktualisiere den Status des Items (Word oder Icon)
+          this.updateItemStatus(listId, type, itemId, isChecked);
+        }
+      });
     }
-  
+// ----------------------------------------------------------------------------
+      async updateItemStatus(listId, type, itemId, isChecked) {
+        try {
+          const endpoint = type === 'icons' 
+            ? `http://localhost:3000/list/${listId}/icons/${itemId}` 
+            : `http://localhost:3000/list/${listId}/words/${itemId}`;
+
+          const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: this.getHeaders(),
+            body: JSON.stringify({ completed: isChecked }), // Completed-Status senden
+          });
+
+          if (!response.ok) throw new Error('Network response was not ok');
+
+          console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} completion status updated successfully`);
+        } catch (error) {
+          console.error(`Error updating ${type} completion status:`, error);
+        }
+      }
+
+// ----------------------------------------------------------------------------
     async createList(listName) {
       try {
         const response = await fetch('http://localhost:3000/list', {
@@ -177,8 +232,10 @@ class ToDoListManager {
         console.error('Error creating list:', error);
       }
     }
+// ----------------------------------------------------------------------------
   }
-  
+// ----------------------------------------------------------------------------
+
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded event fired');
     new ToDoListManager();

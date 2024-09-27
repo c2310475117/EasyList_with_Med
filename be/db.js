@@ -18,7 +18,7 @@ const Sequ = new Sequelize({
 // Synchronisiere alle Modelle
 const syncDatabase = async () => {
   try {
-    await sequelize.query('PRAGMA busy_timeout = 30000');
+    await Sequ.query('PRAGMA busy_timeout = 30000');
     await Sequ.authenticate();
     console.log('Connection to the database has been established successfully.');
     await Sequ.sync({ force: false }); // setze force auf false um die Daten nicht zu verlieren
