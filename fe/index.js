@@ -87,7 +87,7 @@ class ToDoListManager {
         <li class="todo-list-item">
         <input type="checkbox" class="todo-list-item input" ${isChecked} data-word-id="${word_id}">
           <span>${word_name}</span>
-          <button class="delete-button">Delete</button>
+          <button type="submit" class="delete-button" data-word-id="${word_id}" >Delete</button>
         </li>
       `;
     });
@@ -98,7 +98,7 @@ class ToDoListManager {
         <li class="todo-list-item">
         <input type="checkbox" class="todo-list-item input" ${isChecked} data-icon-id="${icon_id}">
           <span>${icon_svg}</span>
-        <button class="delete-button">Delete</button>
+        <button type="submit" class="delete-button" data-icon-id="${icon_id}" >Delete</button>
       </li>
     `;
   });
@@ -174,7 +174,7 @@ class ToDoListManager {
         }
       });
 
-      document.getElementById('listContainer').addEventListener('change', (event) => {
+      document.getElementById('listContainer').addEventListener('change', (event) => { // Event - Delegation to `list-container`
         if (event.target.matches('.todo-list-item input')) {
           const listId = event.target.closest('.user-list').dataset.listId; // List ID finden
           const wordId = event.target.dataset.wordId; // Word ID abrufen
@@ -194,6 +194,37 @@ class ToDoListManager {
           this.updateItemStatus(listId, type, itemId, isChecked);
         }
       });
+
+      document.getElementById('listContainer').addEventListener('click', (event) => { // Event - Delegation to `list-container`
+        if (event.target.matches('.delete-button')) {
+          const listId = event.target.closest('.user-list').dataset.listId; // List ID finden
+          const wordId = event.target.dataset.wordId; // Word ID abrufen
+          const iconId = event.target.dataset.iconId; // Icon ID abrufen
+      
+          // Bestimme, ob es ein Word oder ein Icon ist
+          const type = wordId ? 'words' : 'icons';
+          const itemId = wordId || iconId; // Verwende entweder wordId oder iconId
+      
+          if (!itemId) {
+            console.error('Item ID not found');
+            return;
+          }
+      
+          this.deleteItem(listId, type, itemId);
+        }
+      });
+
+      document.getElementById('listContainer').addEventListener('click', (event) => { 
+        if (event.target.matches('.delete-list-button')) {
+          const listId = event.target.closest('.user-list').dataset.listId; // Holt die listId
+          if (listId) {
+            this.deleteList(listId); // Lösche Liste basierend auf der listId
+          } else {
+            console.error('List ID not found');
+          }
+        }
+      });      
+    
     }
 // ----------------------------------------------------------------------------
       async updateItemStatus(listId, type, itemId, isChecked) {
@@ -215,6 +246,48 @@ class ToDoListManager {
           console.error(`Error updating ${type} completion status:`, error);
         }
       }
+
+// ----------------------------------------------------------------------------
+      async deleteItem(listId, type, itemId) {
+        try {
+          const endpoint = type === 'icons'
+            ? `http://localhost:3000/list/${listId}/icons/${itemId}`
+            : `http://localhost:3000/list/${listId}/words/${itemId}`;
+
+          const response = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: this.getHeaders(),
+          });
+
+          if (!response.ok) throw new Error('Network response was not ok');
+
+          console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`);
+
+          // Aktualisiere die Liste nach dem Löschen
+          await this.fetchUserLists();
+        } catch (error) {
+          console.error(`Error deleting ${type}:`, error);
+        }
+      }
+
+// ----------------------------------------------------------------------------
+async deleteList(listId) {
+  try {
+    const response = await fetch(`http://localhost:3000/list/${listId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(), // Hier wird der Token für die Authentifizierung mitgeschickt
+    });
+
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    console.log(`List with ID ${listId} deleted successfully`);
+
+    // Aktualisiere die Liste nach dem Löschen
+    await this.fetchUserLists();
+  } catch (error) {
+    console.error('Error deleting list:', error);
+  }
+}
 
 // ----------------------------------------------------------------------------
     async createList(listName) {

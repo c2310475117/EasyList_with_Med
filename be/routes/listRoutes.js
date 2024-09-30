@@ -5,7 +5,7 @@ import Word from '../models/wordModel.js';
 import List from '../models/listModel.js';
 import Icon from '../models/iconModel.js';
 import { getIconDatafromAPI } from '../controller/IconApi.js';
-import { authMiddleware } from '../auth.js';
+import { authMiddleware , checkListAccess} from '../auth.js';
 
 const router = express.Router();
 
@@ -139,6 +139,71 @@ router.put('/:listId/icons/:iconId', authMiddleware, async (req, res) => {
     res.status(500).send('Error updating status');
   }
 });
+
+router.delete('/:listId/words/:wordId', authMiddleware, async (req, res) => {
+  const { listId, wordId } = req.params;
+
+  try {
+    const deleted = await Word.destroy({
+      where: { word_id: wordId, w_list_id: listId }
+    });
+
+    if (deleted) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Word not found');
+    }
+  } catch (error) {
+    console.error('Error deleting word:', error);
+    res.status(500).send('Error deleting word');
+  }
+});
+
+router.delete('/:listId/icons/:iconId', authMiddleware,  async (req, res) => {
+  const { listId, iconId } = req.params;
+
+  try {
+    const deleted = await Icon.destroy({
+      where: { icon_id: iconId, i_list_id: listId }
+    });
+
+    if (deleted) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Icon not found');
+    }
+  } catch (error) {
+    console.error('Error deleting icon:', error);
+    res.status(500).send('Error deleting icon');
+  }
+});
+
+
+router.delete('/:listId', authMiddleware, checkListAccess, async (req, res) => {
+  const { listId } = req.params;
+  const userId = req.user.userId; // Hole die userId aus dem Token
+
+  try {
+    // Lösche die Liste nur, wenn sie dem authentifizierten Nutzer gehört
+    const deleted = await List.destroy({
+      where: {
+        list_id: listId, // Löschen der Liste basierend auf der listId
+        l_user_id: userId, // Stelle sicher, dass die Liste dem Nutzer gehört
+      },
+    });
+
+    if (deleted) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('List not found or does not belong to the user');
+    }
+  } catch (error) {
+    console.error('Error deleting list:', error);
+    res.status(500).send('Error deleting list');
+  }
+});
+
+
 
 //-------------------------------------------------------------------
 

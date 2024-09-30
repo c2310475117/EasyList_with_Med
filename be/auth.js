@@ -35,14 +35,14 @@ const authMiddleware = (req, res, next) => {
 
 const checkListAccess = async (req, res, next) => {
   try {
-    const listName = req.params.list_name; // Listennamen aus den Request-Parametern extrahieren
+    const listId = req.params.listId; // Listennamen aus den Request-Parametern extrahieren
     const userId = req.user.userId; // ID des authentifizierten Benutzers aus req.user
 
     console.log("UserID:", userId);
-    console.log("ListID:", listName);
+    console.log("ListID:", listId);
 
     // Überprüfen, ob der Benutzer Zugriff auf die Liste hat
-    const list = await List.findOne({ where: { list_name: listName, l_user_id: userId } }); // Annahme: List-Modell mit findOne
+    const list = await List.findOne({ where: { list_id: listId, l_user_id: userId } }); // Annahme: List-Modell mit findOne
 
     if (!list) {
       return res.status(403).json({ message: 'Keine Berechtigung für die angeforderte Aktion.' });
