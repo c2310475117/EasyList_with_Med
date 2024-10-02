@@ -4,6 +4,8 @@ import User from '../models/userModel.js';
 import List from '../models/listModel.js';
 import Word from '../models/wordModel.js';
 import Icon from '../models/iconModel.js';
+import Med from '../models/medModel.js';
+
 
 
 // Beispiel: Definieren der Controller-Routen
@@ -19,6 +21,9 @@ const controllerRoutes = () => {
 
   List.hasMany(Icon, { foreignKey: 'i_list_id' });
   Icon.belongsTo(List, { foreignKey: 'i_list_id' });
+
+  List.hasMany(Med, { foreignKey: 'm_list_id' });
+  Med.belongsTo(List, { foreignKey: 'm_list_id' });
   
 } catch (error) {
   console.error('Error setting up model relationships:', error);

@@ -23,6 +23,7 @@ Icon.init({
     type: DataTypes.BOOLEAN, 
     defaultValue: false
   },
+  
   i_list_id: {
     type: DataTypes.INTEGER,
     allowNull: false,

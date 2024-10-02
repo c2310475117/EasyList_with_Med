@@ -4,7 +4,9 @@ import express from 'express';
 import Word from '../models/wordModel.js';
 import List from '../models/listModel.js';
 import Icon from '../models/iconModel.js';
+import Med from '../models/medModel.js';
 import { getIconDatafromAPI } from '../controller/IconApi.js';
+import { getMedfromAPI, compareMedfromAPI, compareWithExistingMedications} from '../controller/MedApi.js';
 import { authMiddleware , checkListAccess} from '../auth.js';
 
 const router = express.Router();
@@ -139,7 +141,7 @@ router.put('/:listId/icons/:iconId', authMiddleware, async (req, res) => {
     res.status(500).send('Error updating status');
   }
 });
-
+//-------------------------------------------------------------------
 router.delete('/:listId/words/:wordId', authMiddleware, async (req, res) => {
   const { listId, wordId } = req.params;
 
@@ -178,7 +180,26 @@ router.delete('/:listId/icons/:iconId', authMiddleware,  async (req, res) => {
   }
 });
 
+router.delete('/:listId/meds/:medId', authMiddleware,  async (req, res) => {
+  const { listId, medId } = req.params;
 
+  try {
+    const deleted = await Med.destroy({
+      where: { med_id: medId, m_list_id: listId }
+    });
+
+    if (deleted) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Icon not found');
+    }
+  } catch (error) {
+    console.error('Error deleting icon:', error);
+    res.status(500).send('Error deleting icon');
+  }
+});
+
+//-------------------------------------------------------------------
 router.delete('/:listId', authMiddleware, checkListAccess, async (req, res) => {
   const { listId } = req.params;
   const userId = req.user.userId; // Hole die userId aus dem Token
@@ -202,8 +223,6 @@ router.delete('/:listId', authMiddleware, checkListAccess, async (req, res) => {
     res.status(500).send('Error deleting list');
   }
 });
-
-
 
 //-------------------------------------------------------------------
 
@@ -257,6 +276,102 @@ router.get('/:listId/icons', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching icons:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+//-------------------------------------------------------------------
+router.post('/:listId/meds', authMiddleware, async (req, res) => {
+  const { listId } = req.params;
+  const { keyword } = req.body;
+
+  try {
+    if (!keyword) {
+      return res.status(400).send('Keyword is required');
+    }
+
+    // Abrufen der Medikamentendaten von der API
+    const medData = await getMedfromAPI(keyword);
+
+    // Erstelle das Medikament in der Datenbank mit der API-ID als med_id
+    const med = await Med.create({
+      med_id: medData.id,     // Verwende die API-ID als med_id
+      m_list_id: listId,
+      med_name: medData.title,  // Verwende den Titel des Medikaments aus der API
+    });
+
+    // Prüfe, ob bereits Medikamente in der Liste vorhanden sind
+    const existingMeds = await Med.findAll({ where: { m_list_id: listId } });
+
+    // Wenn mehr als 1 Medikament in der Liste ist, vergleiche mit dem neuen Medikament
+    if (existingMeds.length > 1) {
+      // Hier wird med.med_id korrekt an compareWithExistingMedications übergeben
+      const comparisonResults = await compareWithExistingMedications(med.med_id, existingMeds);
+      console.log('Comparison results:', comparisonResults);
+
+      // Wenn Wechselwirkungen gefunden wurden, sende diese als Teil der Antwort
+      if (comparisonResults.length > 0) {
+        return res.status(201).json({ med, interactions: comparisonResults });
+      }
+    }
+
+    // Wenn keine oder nur ein Medikament in der Liste ist, oder keine Wechselwirkungen gefunden wurden
+    res.status(201).json({ med, message: 'No interactions found' });
+
+  } catch (error) {
+    console.error('Error creating med:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+
+router.get('/:listId/meds', authMiddleware, async (req, res) => {
+  const { listId } = req.params; 
+
+  console.log(`Fetching meds for listId: ${listId}`);
+
+  try {
+    const meds = await Med.findAll({
+      where: { m_list_id: listId },
+      attributes: ['med_id', 'med_name'], // Hier sicherstellen, dass die med_id auch zurückgegeben wird
+    });
+    
+    if (!meds || meds.length === 0) {
+      console.log(`No meds found for listId: ${listId}`);
+      return res.status(404).json({ message: 'No meds found for this list' });
+    }
+    
+    res.status(200).json({ meds });
+  } catch (error) {
+    console.error('Error fetching meds:', error);
+    res.status(500).json({ message: 'Internal med get server error' });
+  }
+});
+
+
+router.put('/:listId/meds/:medId', authMiddleware, async (req, res) => {
+  const { listId, medId } = req.params;
+  const { completed } = req.body;
+
+  try {
+   
+    const [updated] = await Med.update(
+      { 
+        completed, 
+        updated_at: new Date() 
+      }, 
+      { where: { med_id: medId, m_list_id: listId } }
+    );
+
+    if (updated) {
+      res.status(200).send({ success: true });
+    } else {
+      res.status(404).send('Word not found');
+    }
+  } catch (error) {
+    console.error('Error updating word status:', error);
+    res.status(500).send('Error updating status');
   }
 });
 
